@@ -4,6 +4,8 @@
 package config
 
 import (
+	"math"
+
 	"github.com/cilium/cilium/pkg/datapath/linux/probes"
 	"github.com/cilium/cilium/pkg/identity"
 	"github.com/cilium/cilium/pkg/loadbalancer"
@@ -71,6 +73,8 @@ func NodeConfig(lnc *Config) Node {
 
 	node.NodeportPortMin = lnc.LBConfig.NodePortMin
 	node.NodeportPortMax = lnc.LBConfig.NodePortMax
+	node.NodeportPortMinNAT = lnc.LBConfig.NodePortMax + 1
+	node.NodeportPortMaxNAT = math.MaxUint16
 
 	if option.Config.EnableNat46X64Gateway {
 		node.NAT46X64Prefix.Addr = option.Config.IPv6NAT46x64CIDRBase.As4()

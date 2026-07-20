@@ -64,8 +64,8 @@ static __always_inline int nodeport_snat_fwd_ipv6(struct __ctx_buff *ctx,
 	void *data, *data_end;
 	struct ipv6hdr *ip6;
 
-	args->target.min_port = NODEPORT_PORT_MIN_NAT;
-	args->target.max_port = NODEPORT_PORT_MAX_NAT;
+	args->target.min_port = CONFIG(nodeport_port_min_nat);
+	args->target.max_port = CONFIG(nodeport_port_max_nat);
 
 	if (!revalidate_data(ctx, &data, &data_end, &ip6))
 		return DROP_INVALID;
@@ -342,8 +342,8 @@ static __always_inline int nodeport_snat_fwd_ipv4(struct __ctx_buff *ctx,
 
 	args = AUX(snat_v4_args);
 	memset(args, 0, sizeof(*args));
-	args->target.min_port = NODEPORT_PORT_MIN_NAT;
-	args->target.max_port = NODEPORT_PORT_MAX_NAT;
+	args->target.min_port = CONFIG(nodeport_port_min_nat);
+	args->target.max_port = CONFIG(nodeport_port_max_nat);
 #if defined(ENABLE_CLUSTER_AWARE_ADDRESSING) && defined(ENABLE_INTER_CLUSTER_SNAT)
 	args->target.cluster_id = cluster_id,
 #endif

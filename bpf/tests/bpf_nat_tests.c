@@ -211,8 +211,8 @@ int test_nat4_icmp_error_tcp(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MIN_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_min_nat),
 	};
 	struct ipv4_nat_entry state;
 	struct trace_ctx trace;
@@ -331,8 +331,8 @@ int test_nat4_icmp_error_tcp_rfc1191(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MIN_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_min_nat),
 	};
 	struct ipv4_nat_entry state;
 	struct trace_ctx trace;
@@ -449,8 +449,8 @@ int test_nat4_icmp_error_udp(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MIN_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_min_nat),
 	};
 	struct ipv4_nat_entry state;
 	struct trace_ctx trace;
@@ -562,8 +562,8 @@ int test_nat4_icmp_error_icmp(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MIN_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_min_nat),
 	};
 	struct ipv4_nat_entry state;
 	struct trace_ctx trace;
@@ -664,8 +664,8 @@ int test_nat4_icmp_error_sctp(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MIN_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_min_nat),
 	};
 	struct ipv4_nat_entry state;
 	struct trace_ctx trace;
@@ -730,8 +730,8 @@ int test_nat4_icmp_error_tcp_egress(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT - 1,
-		.max_port = NODEPORT_PORT_MIN_NAT - 1,
+		.min_port = CONFIG(nodeport_port_min_nat) - 1,
+		.max_port = CONFIG(nodeport_port_min_nat) - 1,
 	};
 	struct ipv4_nat_entry state;
 	void *map;
@@ -855,8 +855,8 @@ int test_nat4_icmp_error_tcp_egress_rfc1191(__maybe_unused struct __ctx_buff *ct
 	};
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),
-		.min_port = NODEPORT_PORT_MIN_NAT - 1,
-		.max_port = NODEPORT_PORT_MIN_NAT - 1,
+		.min_port = CONFIG(nodeport_port_min_nat) - 1,
+		.max_port = CONFIG(nodeport_port_min_nat) - 1,
 	};
 	struct ipv4_nat_entry state;
 	void *map;
@@ -978,8 +978,8 @@ int test_nat4_icmp_error_udp_egress(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 	    .addr = bpf_htonl(IP_HOST),
-	    .min_port = NODEPORT_PORT_MIN_NAT - 1,
-	    .max_port = NODEPORT_PORT_MIN_NAT - 1,
+	    .min_port = CONFIG(nodeport_port_min_nat) - 1,
+	    .max_port = CONFIG(nodeport_port_min_nat) - 1,
 	};
 	struct ipv4_nat_entry state;
 	void *map;
@@ -1096,8 +1096,8 @@ int test_nat4_icmp_error_icmp_egress(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 	    .addr = bpf_htonl(IP_HOST),
-	    .min_port = NODEPORT_PORT_MIN_NAT - 1,
-	    .max_port = NODEPORT_PORT_MIN_NAT - 1,
+	    .min_port = CONFIG(nodeport_port_min_nat) - 1,
+	    .max_port = CONFIG(nodeport_port_min_nat) - 1,
 	};
 	struct ipv4_nat_entry state;
 	void *map;
@@ -1203,8 +1203,8 @@ int test_nat4_icmp_error_sctp_egress(__maybe_unused struct __ctx_buff *ctx)
 	};
 	struct ipv4_nat_target target = {
 	    .addr = bpf_htonl(IP_HOST),
-	    .min_port = NODEPORT_PORT_MIN_NAT - 1,
-	    .max_port = NODEPORT_PORT_MIN_NAT,
+	    .min_port = CONFIG(nodeport_port_min_nat) - 1,
+	    .max_port = CONFIG(nodeport_port_min_nat),
 	};
 	struct ipv4_nat_entry state;
 	void *map;
@@ -1289,8 +1289,8 @@ __u32 daddrs[] = {
 #define SNAT_TEST_CLIENTS 16
 #define SNAT_TEST_ITERATIONS \
 	SIMPLE_MIN(ARRAY_SIZE(tcp_ports0) * SNAT_TEST_CLIENTS, \
-		   ARRAY_SIZE(daddrs) * (NODEPORT_PORT_MAX_NAT - \
-		   NODEPORT_PORT_MIN_NAT + 1))
+		   ARRAY_SIZE(daddrs) * (CONFIG(nodeport_port_max_nat) - \
+		   CONFIG(nodeport_port_min_nat) + 1))
 
 static __u32 retries_before[SNAT_COLLISION_RETRIES + 1];
 static __u32 retries_10percent[SNAT_COLLISION_RETRIES + 1];
@@ -1332,8 +1332,8 @@ static long snat_callback_tcp(__u32 i, struct snat_callback_ctx *ctx)
 	};
 	struct ipv4_nat_entry ostate;
 	struct ipv4_nat_target target = {
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MAX_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_max_nat),
 		.needs_ct = true,
 		.egress_gateway = true,
 		.addr = bpf_htonl(0x0AA40001),
@@ -1459,8 +1459,8 @@ static long snat_callback_udp(__u32 i, struct snat_callback_ctx *ctx)
 	};
 	struct ipv4_nat_entry ostate;
 	struct ipv4_nat_target target = {
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MAX_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_max_nat),
 		.needs_ct = true,
 		.egress_gateway = true,
 		.addr = bpf_htonl(0x0AA40001),

@@ -39,6 +39,7 @@
 static volatile const __u8 *node_mac = mac_one;
 static volatile const __u8 *server_mac = mac_two;
 
+#include "nodeport_defaults.h"
 #include "lib/bpf_host.h"
 
 /*

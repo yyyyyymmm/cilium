@@ -63,8 +63,8 @@ int test_nat4_remote_node_masquerade_enabled(__maybe_unused struct __ctx_buff *c
     args->tuple.flags = NAT_DIR_EGRESS;
 
     /* Setup NAT target structure */
-    args->target.min_port = NODEPORT_PORT_MIN_NAT; /* Standard min port */
-    args->target.max_port = NODEPORT_PORT_MAX_NAT; /* Standard max port */
+    args->target.min_port = CONFIG(nodeport_port_min_nat); /* Standard min port */
+    args->target.max_port = CONFIG(nodeport_port_max_nat); /* Standard max port */
     args->target.addr = 0;
     args->target.from_local_endpoint = false;
     args->target.egress_gateway = false;

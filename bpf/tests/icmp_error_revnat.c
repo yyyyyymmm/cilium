@@ -88,8 +88,8 @@ int nat4_icmp_error_tcp_snat_revnat_setup(struct __ctx_buff *ctx)
 	/* NAT target: translate to pod IP */
 	struct ipv4_nat_target target = {
 		.addr = bpf_htonl(IP_HOST),  /* 192.168.0.1 */
-		.min_port = NODEPORT_PORT_MIN_NAT,
-		.max_port = NODEPORT_PORT_MIN_NAT,
+		.min_port = CONFIG(nodeport_port_min_nat),
+		.max_port = CONFIG(nodeport_port_min_nat),
 	};
 
 	struct ipv4_nat_entry state;
