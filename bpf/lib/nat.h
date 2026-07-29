@@ -68,6 +68,19 @@ nat_min_egress()
 	return CONFIG(ephemeral_min);
 }
 
+static __always_inline bool
+is_port_in_nat_range(__u16 sport)
+{
+	bool in_nat_range = sport >= CONFIG(nodeport_port_min_nat) &&
+			    sport <= CONFIG(nodeport_port_max_nat);
+
+	if (CONFIG(nodeport_port_max_nat_ext))
+		in_nat_range |= sport >= CONFIG(nodeport_port_min_nat_ext) &&
+				sport <= CONFIG(nodeport_port_max_nat_ext);
+
+	return in_nat_range;
+}
+
 /* Clamp a port to the range [start, end].
  *
  * Introduces a slight bias.
@@ -594,7 +607,7 @@ snat_v4_nat_can_skip(const struct ipv4_nat_target *target,
 		return false;
 #endif
 
-	return (!target->from_local_endpoint && sport < nat_min_egress());
+	return (!target->from_local_endpoint && !is_port_in_nat_range(sport));
 }
 
 static __always_inline bool
@@ -1665,7 +1678,7 @@ snat_v6_nat_can_skip(const struct ipv6_nat_target *target,
 		return false;
 #endif
 
-	return (!target->from_local_endpoint && sport < nat_min_egress());
+	return (!target->from_local_endpoint && !is_port_in_nat_range(sport));
 }
 
 static __always_inline bool

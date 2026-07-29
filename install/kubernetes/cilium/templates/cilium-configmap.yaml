@@ -741,6 +741,9 @@ data:
 {{- else if eq $defaultBpfMasquerade "true" }}
   enable-bpf-masquerade: {{ $defaultBpfMasquerade | quote }}
 {{- end }}
+{{- if .Values.bpf.nodePortNATRangeExt }}
+  node-port-nat-range-ext: {{ .Values.bpf.nodePortNATRangeExt | quote }}
+{{- end }}
   enable-masquerade-to-route-source: {{ .Values.enableMasqueradeRouteSource | quote }}
 {{- if hasKey .Values "egressMasqueradeInterfaces" }}
   egress-masquerade-interfaces: {{ .Values.egressMasqueradeInterfaces }}

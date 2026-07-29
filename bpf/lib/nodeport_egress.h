@@ -64,8 +64,7 @@ static __always_inline int nodeport_snat_fwd_ipv6(struct __ctx_buff *ctx,
 	void *data, *data_end;
 	struct ipv6hdr *ip6;
 
-	args->target.min_port = CONFIG(nodeport_port_min_nat);
-	args->target.max_port = CONFIG(nodeport_port_max_nat);
+	select_nat_port_range_ipv6(&args->target);
 
 	if (!revalidate_data(ctx, &data, &data_end, &ip6))
 		return DROP_INVALID;
@@ -109,6 +108,17 @@ static __always_inline int nodeport_snat_fwd_ipv6(struct __ctx_buff *ctx,
 apply_snat:
 	ipv6_addr_copy(saddr, &args->tuple.saddr);
 	ret = snat_v6_nat(ctx, fraginfo, l4_off, ext_err);
+	if (CONFIG(nodeport_port_max_nat_ext) &&
+	    ret == DROP_NAT_NO_MAPPING) {
+		if (args->target.min_port == CONFIG(nodeport_port_min_nat)) {
+			args->target.min_port = CONFIG(nodeport_port_min_nat_ext);
+			args->target.max_port = CONFIG(nodeport_port_max_nat_ext);
+		} else {
+			args->target.min_port = CONFIG(nodeport_port_min_nat);
+			args->target.max_port = CONFIG(nodeport_port_max_nat);
+		}
+		ret = snat_v6_nat(ctx, fraginfo, l4_off, ext_err);
+	}
 	if (IS_ERR(ret))
 		goto out;
 
@@ -342,8 +352,7 @@ static __always_inline int nodeport_snat_fwd_ipv4(struct __ctx_buff *ctx,
 
 	args = AUX(snat_v4_args);
 	memset(args, 0, sizeof(*args));
-	args->target.min_port = CONFIG(nodeport_port_min_nat);
-	args->target.max_port = CONFIG(nodeport_port_max_nat);
+	select_nat_port_range_ipv4(&args->target);
 #if defined(ENABLE_CLUSTER_AWARE_ADDRESSING) && defined(ENABLE_INTER_CLUSTER_SNAT)
 	args->target.cluster_id = cluster_id,
 #endif
@@ -421,6 +430,18 @@ apply_snat:
 	*saddr = args->tuple.saddr;
 	ret = snat_v4_nat(ctx, &args->tuple, ip4, fraginfo, l4_off,
 			  &args->target, trace, ext_err);
+	if (CONFIG(nodeport_port_max_nat_ext) &&
+	    ret == DROP_NAT_NO_MAPPING) {
+		if (args->target.min_port == CONFIG(nodeport_port_min_nat)) {
+			args->target.min_port = CONFIG(nodeport_port_min_nat_ext);
+			args->target.max_port = CONFIG(nodeport_port_max_nat_ext);
+		} else {
+			args->target.min_port = CONFIG(nodeport_port_min_nat);
+			args->target.max_port = CONFIG(nodeport_port_max_nat);
+		}
+		ret = snat_v4_nat(ctx, &args->tuple, ip4, fraginfo, l4_off,
+				  &args->target, trace, ext_err);
+	}
 	if (IS_ERR(ret))
 		goto out;
 

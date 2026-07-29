@@ -705,6 +705,9 @@ bpf:
   # -- (bool) Enable native IP masquerade support in eBPF
   # @default -- `false`
   masquerade: ~
+  # -- (string) Configure an extended range of ephemeral ports for BPF masquerade (e.g. "1024,29999")
+  # @default -- `""`
+  nodePortNATRangeExt: ""
   # @schema
   # type: [null, boolean]
   # @schema

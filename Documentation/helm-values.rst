@@ -468,6 +468,10 @@
      - Configures the maximum number of entries for the node table.
      - int
      - ``nil``
+   * - :spelling:ignore:`bpf.nodePortNATRangeExt`
+     - Configure an extended range of ephemeral ports for BPF masquerade (e.g. "1024,29999")
+     - string
+     - ``""``
    * - :spelling:ignore:`bpf.policyMapMax`
      - Configure the maximum number of entries in endpoint policy map (per endpoint). @schema type: [null, integer] @schema
      - int

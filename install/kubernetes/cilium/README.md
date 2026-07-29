@@ -167,6 +167,7 @@ contributors across the globe, there is almost always someone available to help.
 | bpf.natMax | int | `524288` | Configure the maximum number of entries for the NAT table. |
 | bpf.neighMax | int | `524288` | Configure the maximum number of entries for the neighbor table. |
 | bpf.nodeMapMax | int | `nil` | Configures the maximum number of entries for the node table. |
+| bpf.nodePortNATRangeExt | string | `""` | Configure an extended range of ephemeral ports for BPF masquerade (e.g. "1024,29999") |
 | bpf.policyMapMax | int | `16384` | Configure the maximum number of entries in endpoint policy map (per endpoint). @schema type: [null, integer] @schema |
 | bpf.policyMapPressureMetricsThreshold | float64 | `0.1` | Configure threshold for emitting pressure metrics of policy maps. @schema type: [null, number] @schema |
 | bpf.policyStatsMapMax | int | `65536` | Configure the maximum number of entries in global policy stats map. @schema type: [null, integer] @schema |

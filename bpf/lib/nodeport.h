@@ -250,6 +250,19 @@ nodeport_fib_lookup_and_redirect(struct __ctx_buff *ctx,
 }
 
 #ifdef ENABLE_IPV6
+static __always_inline __maybe_unused
+void select_nat_port_range_ipv6(struct ipv6_nat_target *target)
+{
+	if (CONFIG(nodeport_port_max_nat_ext) &&
+	    (get_prandom_u32() & 0x1)) {
+		target->min_port = CONFIG(nodeport_port_min_nat_ext);
+		target->max_port = CONFIG(nodeport_port_max_nat_ext);
+	} else {
+		target->min_port = CONFIG(nodeport_port_min_nat);
+		target->max_port = CONFIG(nodeport_port_max_nat);
+	}
+}
+
 static __always_inline bool nodeport_uses_dsr6(const struct lb6_service *svc)
 {
 	return nodeport_uses_dsr(svc->flags2 & SVC_FLAG_FWD_MODE_DSR);
@@ -1153,6 +1166,14 @@ int tail_nodeport_nat_ingress_ipv6(struct __ctx_buff *ctx)
 	int ret;
 
 	ret = snat_v6_rev_nat(ctx, &target, &trace, &ext_err);
+	if (CONFIG(nodeport_port_max_nat_ext)) {
+		if (ret == DROP_NAT_NO_MAPPING || ret == NAT_PUNT_TO_STACK) {
+			memset(&target, 0, sizeof(target));
+			target.min_port = CONFIG(nodeport_port_min_nat_ext);
+			target.max_port = CONFIG(nodeport_port_max_nat_ext);
+			ret = snat_v6_rev_nat(ctx, &target, &trace, &ext_err);
+		}
+	}
 	if (IS_ERR(ret)) {
 		if (ret == NAT_PUNT_TO_STACK ||
 		    /* DROP_NAT_NO_MAPPING is unwanted behavior in a
@@ -1219,8 +1240,6 @@ int tail_nodeport_nat_egress_ipv6(struct __ctx_buff *ctx)
 	const bool nat_46x64 = nat46x64_cb_xlate(ctx);
 	struct bpf_fib_lookup_padded *fib_params = AUX(nodeport_fib_params);
 	struct ipv6_nat_target target = {
-		.min_port = CONFIG(nodeport_port_min_nat),
-		.max_port = CONFIG(nodeport_port_max_nat),
 		.addr = IPV6_DIRECT_ROUTING,
 	};
 	struct ipv6_ct_tuple tuple __align_stack_8 = {};
@@ -1241,6 +1260,8 @@ int tail_nodeport_nat_egress_ipv6(struct __ctx_buff *ctx)
 
 	if (nat_46x64)
 		build_v4_in_v6(&target.addr, IPV4_DIRECT_ROUTING);
+
+	select_nat_port_range_ipv6(&target);
 
 	if (!revalidate_data(ctx, &data, &data_end, &ip6)) {
 		ret = DROP_INVALID;
@@ -1295,6 +1316,18 @@ skip_source_lookup:
 
 	ret = __snat_v6_nat(ctx, &tuple, state, fraginfo, l4_off, true,
 			    &target, TCP_SPORT_OFF, &trace, &ext_err);
+	if (CONFIG(nodeport_port_max_nat_ext) &&
+	    ret == DROP_NAT_NO_MAPPING) {
+		if (target.min_port == CONFIG(nodeport_port_min_nat)) {
+			target.min_port = CONFIG(nodeport_port_min_nat_ext);
+			target.max_port = CONFIG(nodeport_port_max_nat_ext);
+		} else {
+			target.min_port = CONFIG(nodeport_port_min_nat);
+			target.max_port = CONFIG(nodeport_port_max_nat);
+		}
+		ret = __snat_v6_nat(ctx, &tuple, state, fraginfo, l4_off, true,
+				    &target, TCP_SPORT_OFF, &trace, &ext_err);
+	}
 	if (IS_ERR(ret))
 		goto drop_err;
 
@@ -1641,6 +1674,19 @@ skip_service_lookup:
 #endif /* ENABLE_IPV6 */
 
 #ifdef ENABLE_IPV4
+static __always_inline __maybe_unused
+void select_nat_port_range_ipv4(struct ipv4_nat_target *target)
+{
+	if (CONFIG(nodeport_port_max_nat_ext) &&
+	    (get_prandom_u32() & 0x1)) {
+		target->min_port = CONFIG(nodeport_port_min_nat_ext);
+		target->max_port = CONFIG(nodeport_port_max_nat_ext);
+	} else {
+		target->min_port = CONFIG(nodeport_port_min_nat);
+		target->max_port = CONFIG(nodeport_port_max_nat);
+	}
+}
+
 static __always_inline bool nodeport_uses_dsr4(const struct lb4_service *svc)
 {
 	return nodeport_uses_dsr(svc->flags2 & SVC_FLAG_FWD_MODE_DSR);
@@ -2457,6 +2503,15 @@ int tail_nodeport_nat_ingress_ipv4(struct __ctx_buff *ctx)
 	int ret;
 
 	ret = snat_v4_rev_nat(ctx, &target, &trace, &ext_err);
+
+	if (CONFIG(nodeport_port_max_nat_ext)) {
+		if (ret == DROP_NAT_NO_MAPPING  || ret == NAT_PUNT_TO_STACK) {
+			memset(&target, 0, sizeof(target));
+			target.min_port = CONFIG(nodeport_port_min_nat_ext);
+			target.max_port = CONFIG(nodeport_port_max_nat_ext);
+			ret = snat_v4_rev_nat(ctx, &target, &trace, &ext_err);
+		}
+	}
 	if (IS_ERR(ret)) {
 		if (ret == NAT_PUNT_TO_STACK ||
 		    /* DROP_NAT_NO_MAPPING is unwanted behavior in a
@@ -2541,8 +2596,6 @@ int tail_nodeport_nat_egress_ipv4(struct __ctx_buff *ctx)
 		},
 	};
 	struct ipv4_nat_target target = {
-		.min_port = CONFIG(nodeport_port_min_nat),
-		.max_port = CONFIG(nodeport_port_max_nat),
 		.addr = IPV4_DIRECT_ROUTING,
 	};
 	struct ipv4_ct_tuple tuple = {};
@@ -2563,6 +2616,8 @@ int tail_nodeport_nat_egress_ipv4(struct __ctx_buff *ctx)
 	const struct remote_endpoint_info *info;
 	__be32 tunnel_endpoint = 0;
 #endif
+
+	select_nat_port_range_ipv4(&target);
 
 	if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
 		ret = DROP_INVALID;
@@ -2621,6 +2676,18 @@ skip_source_lookup:
 
 	ret = __snat_v4_nat(ctx, &tuple, state, fraginfo, l4_off, true,
 			    &target, TCP_SPORT_OFF, &trace, &ext_err);
+	if (CONFIG(nodeport_port_max_nat_ext) &&
+	    ret == DROP_NAT_NO_MAPPING) {
+		if (target.min_port == CONFIG(nodeport_port_min_nat)) {
+			target.min_port = CONFIG(nodeport_port_min_nat_ext);
+			target.max_port = CONFIG(nodeport_port_max_nat_ext);
+		} else {
+			target.min_port = CONFIG(nodeport_port_min_nat);
+			target.max_port = CONFIG(nodeport_port_max_nat);
+		}
+		ret = __snat_v4_nat(ctx, &tuple, state, fraginfo, l4_off, true,
+				    &target, TCP_SPORT_OFF, &trace, &ext_err);
+	}
 	if (IS_ERR(ret))
 		goto drop_err;
 
